@@ -1,0 +1,9 @@
+[submodule "modules/proxy-factory"]
+	path = modules/proxy-factory
+	url = https://github.com/maple-labs/proxy-factory.git
+[submodule "modules/erc20"]
+	path = modules/erc20
+	url = https://github.com/maple-labs/erc20.git
+[submodule "modules/ds-test"]
+	path = modules/ds-test
+	url = https://github.com/dapphub/ds-test.git

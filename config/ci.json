@@ -1,0 +1,36 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/ProxiedToken.sol": {
+      "urls": ["contracts/ProxiedToken.sol"]
+    },
+    "contracts/TokenProxyFactory.sol": {
+      "urls": ["contracts/TokenProxyFactory.sol"]
+    },
+    "contracts/TokenProxyInitializer.sol": {
+      "urls": ["contracts/TokenProxyInitializer.sol"]
+    },
+    "contracts/test/Test.t.sol": {
+      "urls": ["contracts/test/Test.t.sol"]
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode"
+        ],
+        "": ["ast"]
+      }
+    },
+    "metadata": {
+      "bytecodeHash": "none"
+    }
+  }
+}
