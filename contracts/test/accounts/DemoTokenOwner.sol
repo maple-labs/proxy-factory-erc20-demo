@@ -13,16 +13,24 @@ contract DemoTokenOwner is Owner, DemoTokenUser {
     /*** Direct Functions ***/
     /************************/
 
-    function demoToken_mint(address token, address recipient, uint256 amount) external {
-        IDemoToken(token).mint(recipient, amount);
+    function demoToken_mint(address token_, address recipient_, uint256 amount_) external {
+        IDemoToken(token_).mint(recipient_, amount_);
+    }
+
+    function demoToken_upgrade(address token_, uint256 version_, bytes calldata arguments_) external {
+        IDemoToken(token_).upgrade(version_, arguments_);
     }
 
     /*********************/
     /*** Try Functions ***/
     /*********************/
 
-    function try_demoToken_mint(address token, address recipient, uint256 amount) external returns (bool ok) {
-        (ok,) = token.call(abi.encodeWithSelector(IDemoToken.mint.selector, recipient, amount));
+    function try_demoToken_mint(address token_, address recipient_, uint256 amount_) external returns (bool ok_) {
+        ( ok_, ) = token_.call(abi.encodeWithSelector(IDemoToken.mint.selector, recipient_, amount_));
+    }
+
+    function try_demoToken_upgrade(address token_, uint256 version_, bytes calldata arguments_) external returns (bool ok_) {
+        ( ok_, ) = token_.call(abi.encodeWithSelector(IDemoToken.upgrade.selector, version_, arguments_));
     }
 
 }

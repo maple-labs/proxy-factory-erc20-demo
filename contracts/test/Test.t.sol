@@ -9,73 +9,61 @@ import { DemoToken }            from "../DemoToken.sol";
 import { DemoTokenFactory }     from "../DemoTokenFactory.sol";
 import { DemoTokenInitializer } from "../DemoTokenInitializer.sol";
 
-import { DemoTokenOwner } from "./accounts/DemoTokenOwner.sol";
-import { DemoTokenUser }  from "./accounts/DemoTokenUser.sol";
+import { DemoTokenFactoryOwner } from "./accounts/DemoTokenFactoryOwner.sol";
+import { DemoTokenFactoryUser }  from "./accounts/DemoTokenFactoryUser.sol";
+import { DemoTokenOwner }        from "./accounts/DemoTokenOwner.sol";
+import { DemoTokenUser }         from "./accounts/DemoTokenUser.sol";
+
+contract MockDemoTokenV2 is DemoToken {
+
+    function getFoo() external view returns(uint256 foo_) {
+        return totalSupply;
+    }
+
+}
 
 contract Test is DSTest {
 
-    function test_newInstance() external {
-        DemoToken            implementation = new DemoToken();
-        DemoTokenFactory     factory        = new DemoTokenFactory();
-        DemoTokenInitializer initializer    = new DemoTokenInitializer();
+    function test_story1() external {
+        DemoTokenFactoryOwner factoryOwner = new DemoTokenFactoryOwner();
+        DemoTokenFactory      factory      = new DemoTokenFactory(address(factoryOwner));
 
-        factory.registerImplementation(1, address(implementation), address(initializer));
-        factory.setRecommendedVersion(1);
+        DemoToken            implementationV1 = new DemoToken();
+        DemoTokenInitializer initializer      = new DemoTokenInitializer();
 
-        assertEq(factory.versionOf(address(implementation)), 1);
+        factoryOwner.demoTokenFactory_registerImplementation(address(factory), uint256(1), address(implementationV1), address(initializer));
+        factoryOwner.demoTokenFactory_setRecommendedVersion(address(factory), uint256(1));
+
+        assertEq(factory.versionOf(address(implementationV1)), uint256(1));
 
         DemoTokenOwner tokenOwner = new DemoTokenOwner();
 
-        IDemoToken token = IDemoToken(
-            factory.newInstance(
-                factory.recommendedVersion(),
-                abi.encode("Test Token", "TST", 8, address(tokenOwner), 1337)
-            )
-        );
+        IDemoToken token = IDemoToken(factory.newToken(abi.encode("TST", "Test Token", uint8(9), address(tokenOwner), uint256(1000))));
 
-        // Assert Factory State
-        assertEq(factory.implementationFor(address(token)), address(implementation));
+        assertEq(token.implementation(),                    address(implementationV1));
+        assertEq(factory.versionOf(token.implementation()), uint256(1));
+        assertEq(factory.tokenAddressFor("TST"),            address(token));
 
-        // Assert Token Proxy
-        assertEq(token.allowance(address(0), address(0)), 0);
-        assertEq(token.balanceOf(address(0)),             0);
-        assertEq(token.balanceOf(address(tokenOwner)),    1337);
-        assertEq(token.decimals(),                        uint8(8));
-        assertEq(token.factory(),                         address(factory));
-        assertEq(token.implementation(),                  address(implementation));
-        assertEq(token.name(),                            "Test Token");
-        assertEq(token.owner(),                           address(tokenOwner));
-        assertEq(token.symbol(),                          "TST");
-        assertEq(token.totalSupply(),                     1337);
+        DemoTokenUser tokenUser = new DemoTokenUser();
 
-        // Test State-Changing Functions
-        DemoTokenOwner anotherTokenOwner = new DemoTokenOwner();
+        DemoTokenUser(address(tokenOwner)).erc20_transfer(address(token), address(tokenUser), uint256(250));
+        assertEq(token.balanceOf(address(tokenUser)), uint256(250));
 
-        assertTrue(!anotherTokenOwner.try_erc20_setOwner(address(token), address(anotherTokenOwner)));
-        assertTrue(        tokenOwner.try_erc20_setOwner(address(token), address(anotherTokenOwner)));
+        MockDemoTokenV2 implementationV2 = new MockDemoTokenV2();
 
-        assertEq(token.owner(), address(anotherTokenOwner));
+        factoryOwner.demoTokenFactory_registerImplementation(address(factory), uint256(2), address(implementationV2), address(initializer));
+        factoryOwner.demoTokenFactory_setRecommendedVersion(address(factory), uint256(2));
+        factoryOwner.demoTokenFactory_enableUpgradePath(address(factory), uint256(1), uint256(2), address(0));
 
-        assertTrue(      !tokenOwner.try_erc20_setOwner(address(token), address(tokenOwner)));
-        assertTrue(anotherTokenOwner.try_erc20_setOwner(address(token), address(tokenOwner)));
+        tokenOwner.demoToken_upgrade(address(token), uint256(2), new bytes(0));
 
-        DemoTokenUser tokenUser1 = new DemoTokenUser();
-        DemoTokenUser tokenUser2 = new DemoTokenUser();
+        assertEq(token.implementation(),                    address(implementationV2));
+        assertEq(factory.versionOf(token.implementation()), uint256(2));
 
-        assertTrue(tokenOwner.try_erc20_approve(address(token), address(tokenUser1), 1000));
+        DemoTokenUser(address(tokenOwner)).erc20_transfer(address(token), address(tokenUser), uint256(250));
 
-        assertTrue(!tokenUser2.try_erc20_transferFrom(address(token), address(tokenOwner), address(tokenUser2), 1000));
-        assertTrue( tokenUser1.try_erc20_transferFrom(address(token), address(tokenOwner), address(tokenUser2), 1000));
-
-        assertTrue(!tokenUser1.try_erc20_transfer(address(token), address(tokenUser1), 200));
-        assertTrue( tokenUser2.try_erc20_transfer(address(token), address(tokenUser1), 200));
-
-        assertTrue(!anotherTokenOwner.try_demoToken_mint(address(token), address(tokenUser2), 10_000));
-        assertTrue(        tokenOwner.try_demoToken_mint(address(token), address(tokenUser2), 10_000));
-
-        assertEq(token.balanceOf(address(tokenOwner)), 337);
-        assertEq(token.balanceOf(address(tokenUser1)), 200);
-        assertEq(token.balanceOf(address(tokenUser2)), 10_800);
+        assertEq(token.balanceOf(address(tokenUser)),      uint256(500));
+        assertEq(MockDemoTokenV2(address(token)).getFoo(), uint256(1000));
     }
 
 }

@@ -8,8 +8,8 @@ contract DemoTokenInitializer is ERC20Initializer, OwnableInitializer {
 
     fallback() external {
         (
-            string memory name,
             string memory symbol,
+            string memory name,
             uint8 decimals,
             address owner,
             uint256 initialSupply

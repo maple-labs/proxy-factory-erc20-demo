@@ -1,14 +1,14 @@
 {
   "language": "Solidity",
   "sources": {
-    "contracts/ProxiedToken.sol": {
-      "urls": ["contracts/ProxiedToken.sol"]
+    "contracts/DemoToken.sol": {
+      "urls": ["contracts/DemoToken.sol"]
     },
-    "contracts/TokenProxyFactory.sol": {
-      "urls": ["contracts/TokenProxyFactory.sol"]
+    "contracts/DemoTokenFactory.sol": {
+      "urls": ["contracts/DemoTokenFactory.sol"]
     },
-    "contracts/TokenProxyInitializer.sol": {
-      "urls": ["contracts/TokenProxyInitializer.sol"]
+    "contracts/DemoTokenInitializer.sol": {
+      "urls": ["contracts/DemoTokenInitializer.sol"]
     },
     "contracts/test/Test.t.sol": {
       "urls": ["contracts/test/Test.t.sol"]

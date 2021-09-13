@@ -7,6 +7,8 @@ import { IProxied } from "../../modules/proxy-factory/contracts/interfaces/IProx
 
 interface IDemoToken is IProxied, IERC20, IOwnable {
 
-    function mint(address recipient, uint256 amount) external;
+    function mint(address recipient_, uint256 amount_) external;
+
+    function upgrade(uint256 version_, bytes calldata arguments_) external;
 
 }
